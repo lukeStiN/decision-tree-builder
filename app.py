@@ -137,7 +137,7 @@ def data_preview(df : pd.DataFrame):
     st.dataframe(df)
 
 # App title
-st.set_page_config(page_title='Decision Tree Builder', page_icon="🌳", layout='centered')
+st.set_page_config(page_title='Decision Tree Builder', page_icon="🌳", layout='centered', menu_items={})
 st.logo('https://www.luc-estienne.com/web/image/website/1/logo', link='https://www.luc-estienne.com/')
 
 st.header('🌳 Decision Tree Builder', divider='gray')
