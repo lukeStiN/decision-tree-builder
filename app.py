@@ -57,14 +57,8 @@ def percent_kpi_chart(percent : float) :
 
     return st.vega_lite_chart(df, {
         "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "title" : {"align": "right", "anchor": "start", "text" : "Accuracy"},
+        "title" : {"align": "right", "anchor": "start", "text" : f"Accuracy : {percent:.1%}"},
         "layer": [
-            {
-                "mark": {
-                    "type": "arc", "theta":0, "theta2":2*3.14,
-                    "color" : "#eeeeee", **radius
-                }
-            },
             {
                 "mark": {
                     "type": "arc", "theta":-1.7, 
@@ -137,7 +131,7 @@ def data_preview(df : pd.DataFrame):
     st.dataframe(df)
 
 # App title
-st.set_page_config(page_title='Decision Tree Builder', page_icon="🌳", layout='centered', menu_items={})
+st.set_page_config(page_title='Decision Tree Builder', page_icon="🌳", layout='centered')
 st.logo('https://www.luc-estienne.com/web/image/website/1/logo', link='https://www.luc-estienne.com/')
 
 st.header('🌳 Decision Tree Builder', divider='gray')
