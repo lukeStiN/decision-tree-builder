@@ -48,7 +48,7 @@ def generate_n_colors(n):
     colors = plt.cm.hsv(np.linspace(0, 1, n+1))
     return [mcolors.rgb2hex(color) for color in colors][1:]
 
-def percent_kpi_chart(percent : float) :
+def percent_kpi_chart(percent : float, title : str, color : str = '#00a67d') :
     """ Retourne un KPI façon pourcentage (basé sur un pie plot vega lite) """
     df = pd.DataFrame({'value': [percent]})
     
@@ -57,14 +57,14 @@ def percent_kpi_chart(percent : float) :
 
     return st.vega_lite_chart(df, {
         "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "title" : {"align": "right", "anchor": "start", "text" : f"Accuracy : {percent:.1%}"},
+        "title" : {"align": "left", "anchor": "start", "text" : f"{title} : {percent:.1%}"},
         "layer": [
             {
                 "mark": {
                     "type": "arc", "theta":-1.7, 
                     "theta2":percent*2*3.14-1.7,
-                    "color" : "#00a67d", 
-                    "cornerRadius":15,
+                    "color" : f"{color}", 
+                    "cornerRadius":15 if percent < 1 else 0,
                     **radius
                 }
             },
@@ -75,9 +75,10 @@ def percent_kpi_chart(percent : float) :
                 }
             }   
         ],
+        # 'width' : 350,
         "config" : {"mark": {"tooltip": False}}
     },
-        theme=None
+        theme=None, use_container_width=True
     )
 
 def plot_decision_tree_graph(model : DecisionTreeClassifier, feature_names):
@@ -147,7 +148,7 @@ main_side = st.container()
 uploaded_file = form_side.file_uploader("Choose a CSV file", type="csv")
 
 if uploaded_file is not None:
-    accuracy, ineractive_graph, static_image, tree_code = main_side.tabs(['Accuracy', 'Interactive Graph', 'Satic Image', 'Python Code'])
+    accuracy, ineractive_graph, static_image, tree_code, prediction = main_side.tabs(['Accuracy', 'Interactive Graph', 'Satic Image', 'Python Code', 'Prediction'])
     data = pd.read_csv(uploaded_file)
 
     # SIDEBAR
@@ -209,8 +210,8 @@ if uploaded_file is not None:
                 model.fit(X_train, y_train)
 
                 # Predict and evaluate
-                y_pred = model.predict(X_test)
-                st.session_state.accuracy = accuracy_score(y_test, y_pred)
+                st.session_state.val_accuracy = accuracy_score(y_test, model.predict(X_test))
+                st.session_state.train_accuracy = accuracy_score(y_train, model.predict(X_train))
                 st.session_state.model = model
 
     if 'model' in st.session_state.keys() :
@@ -225,8 +226,21 @@ if uploaded_file is not None:
                     with ineractive_graph.container(border=True) :
                         plot_decision_tree_graph(st.session_state.model, feature_names=feature_columns)
 
+        with prediction :
+            _col1, _col2 = st.columns(2)
+            with _col1 :
+                '#### Insert data :'
+                df = st.data_editor(pd.DataFrame(0, index=[0], columns=feature_columns), hide_index=True)
+                y_proba = st.session_state.model.predict(df)
+
+            with _col2 :
+                '#### Prediction :'
+                f'`{y_proba[0]}`'
+
     if 'accuracy' in st.session_state.keys() :
         with accuracy :
-            percent_kpi_chart(st.session_state.accuracy)
+            _col1, _col2 = st.columns(2)
+            with _col1 : percent_kpi_chart(st.session_state.train_accuracy, 'Training Accuracy')
+            with _col2 : percent_kpi_chart(st.session_state.val_accuracy, 'Test Accuracy')
 
     tree_code.code(get_decision_tree_code())
