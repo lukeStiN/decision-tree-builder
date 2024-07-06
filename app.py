@@ -237,7 +237,7 @@ if uploaded_file is not None:
                 '#### Prediction :'
                 f'`{y_proba[0]}`'
 
-    if 'accuracy' in st.session_state.keys() :
+    if 'val_accuracy' in st.session_state.keys() :
         with accuracy :
             _col1, _col2 = st.columns(2)
             with _col1 : percent_kpi_chart(st.session_state.train_accuracy, 'Training Accuracy')
